@@ -9,8 +9,33 @@ var crypto = require("crypto");
 var app = require('express')();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
+var request = require('request');
+
+let fetchGoogleName = function(token:string, callback:(googleName:string) => void):void {
+    request("https://www.googleapis.com/oauth2/v3/tokeninfo?id_token="+encodeURIComponent(token), (error, response, body) => {
+        if (error == null && response.statusCode == 200) {
+            var userFields = JSON.parse(body);
+            var email:string = userFields.email.toLowerCase();
+            callback(email.split("@")[0]);
+        }  else {
+            callback(null);
+        }
+    });
+};
 
 io.on('connection', function(connection:any) {
+    connection.data = {};
+
+    connection.on('login', function(data:any) {
+        if (connection.data == null) return;
+        let token:string = data.token;
+        fetchGoogleName(token, function(googleName:string){
+            connection.data.username = googleName;
+            users[googleName] = connection;
+            connection.emit("login", {username:googleName});
+        });
+    });
+
     console.log("Connected!");
     connection.data = {id:crypto.randomBytes(64).toString('hex')};
     users[connection.data.id] = connection;
@@ -89,5 +114,6 @@ var onQuit = function(userId:string) {
 };
 
 server.listen(3000);
+console.log("Code Collab server has started.");
 
 

@@ -1,26 +1,15 @@
 import {Snippet} from "./snippet";
+import {Game} from "./game";
 
-declare var io, Phaser;
+declare var io, Phaser, gapi, $;
 
 export class App {
     private snippets:string[];
     private choices:string[];
     private socket:any;
-    //private phaser:any;
+    private phaser:any;
 
     public constructor() {
-        //this.phaser = new Phaser.Game(800, 600, Phaser.AUTO, 'app', {
-        //    preload: () => {
-        //
-        //    },
-        //    create: () => {
-        //
-        //    },
-        //    update: () => {
-        //
-        //    }
-        //});
-
         //this.choices = [];
         //this.snippets = [
         //    Snippet.ACTION_JUNGLE,
@@ -37,9 +26,48 @@ export class App {
         //console.log(this.choices);
         //this.choices.push(null);
         //this.build(this.choices);
+
+        $("#connecting").hide();
+        $("#login").hide();
+        $("#active").hide();
+
+        $("#content").show();
+
+        this.renderLoginButton();
+    }
+
+    private renderLoginButton():void {
+        $("#login").show();
+        gapi.signin2.render("my-signin2", {
+            scope : "profile email",
+            onsuccess : (googleUser:any) => {
+                $("#login").hide();
+                let token:string = googleUser.getAuthResponse().id_token;
+                this.connectToServer(token);
+            },
+            onfailure : () => {
+                alert("Google sign-in error has occurred.");
+            }
+        });
+    }
+
+    private connectToServer(token:string):void {
+        $("#connecting").show();
         this.socket = io("http://127.0.0.1:3000");
         this.socket.once("connect", () => {
-            console.log("Connected!");
+            this.socket.once("disconnect", () => {
+                window.location.reload(true);
+            });
+            this.socket.emit("login", {token:token});
+            this.socket.once("login", (data:any) => {
+                $("#connecting").hide();
+                if (data.err != null) alert(data.err);
+                else {
+                    console.log(`Welcome, ${data.username}!`);
+                    $("#active").show();
+                    new Game(this.socket);
+                }
+            });
         });
     }
 

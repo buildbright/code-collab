@@ -31,6 +31,7 @@ export class SimplyBuilder {
     }
 
     public build(createHandler:() => void, updateHandler:(passedTime:number) => void):Simply {
-
+        //TODO
+        return null;
     }
 }

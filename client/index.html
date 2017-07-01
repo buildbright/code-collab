@@ -3,16 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>Code Collab</title>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id" content="369682439691-dotpfi9fsqabij24dktfm29b0ri8mbep.apps.googleusercontent.com">
 </head>
 <body>
-<div id="content">
-    <section id="login">
-        <form id=""
+<div style="display: none" id="content">
+    <section id="connecting">
+        Connecting to server...
     </section>
-    <section id="active"></section>
-    <!--<div id="app"></div>-->
+    <section id="login">
+        <div id="my-signin2"></div>
+    </section>
+    <section id="active">
+        <div id="app"></div>
+    </section>
 </div>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="scripts/lib/socket.io.js"></script>
 <script src="scripts/lib/phaser.js"></script>
 <script src="scripts/lib/system.js"></script>

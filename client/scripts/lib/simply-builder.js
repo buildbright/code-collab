@@ -21,6 +21,8 @@ System.register([], function(exports_1) {
                     return this;
                 };
                 SimplyBuilder.prototype.build = function (createHandler, updateHandler) {
+                    //TODO
+                    return null;
                 };
                 return SimplyBuilder;
             })();

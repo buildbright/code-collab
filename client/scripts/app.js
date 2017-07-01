@@ -1,26 +1,17 @@
-System.register(["./snippet"], function(exports_1) {
-    var snippet_1;
+System.register(["./snippet", "./game"], function(exports_1) {
+    var snippet_1, game_1;
     var App;
     return {
         setters:[
             function (snippet_1_1) {
                 snippet_1 = snippet_1_1;
+            },
+            function (game_1_1) {
+                game_1 = game_1_1;
             }],
         execute: function() {
             App = (function () {
-                //private phaser:any;
                 function App() {
-                    //this.phaser = new Phaser.Game(800, 600, Phaser.AUTO, 'app', {
-                    //    preload: () => {
-                    //
-                    //    },
-                    //    create: () => {
-                    //
-                    //    },
-                    //    update: () => {
-                    //
-                    //    }
-                    //});
                     //this.choices = [];
                     //this.snippets = [
                     //    Snippet.ACTION_JUNGLE,
@@ -37,11 +28,48 @@ System.register(["./snippet"], function(exports_1) {
                     //console.log(this.choices);
                     //this.choices.push(null);
                     //this.build(this.choices);
+                    $("#connecting").hide();
+                    $("#login").hide();
+                    $("#active").hide();
+                    $("#content").show();
+                    this.renderLoginButton();
+                }
+                App.prototype.renderLoginButton = function () {
+                    var _this = this;
+                    $("#login").show();
+                    gapi.signin2.render("my-signin2", {
+                        scope: "profile email",
+                        onsuccess: function (googleUser) {
+                            $("#login").hide();
+                            var token = googleUser.getAuthResponse().id_token;
+                            _this.connectToServer(token);
+                        },
+                        onfailure: function () {
+                            alert("Google sign-in error has occurred.");
+                        }
+                    });
+                };
+                App.prototype.connectToServer = function (token) {
+                    var _this = this;
+                    $("#connecting").show();
                     this.socket = io("http://127.0.0.1:3000");
                     this.socket.once("connect", function () {
-                        console.log("Connected!");
+                        _this.socket.once("disconnect", function () {
+                            window.location.reload(true);
+                        });
+                        _this.socket.emit("login", { token: token });
+                        _this.socket.once("login", function (data) {
+                            $("#connecting").hide();
+                            if (data.err != null)
+                                alert(data.err);
+                            else {
+                                console.log("Welcome, " + data.username + "!");
+                                $("#active").show();
+                                new game_1.Game(_this.socket);
+                            }
+                        });
                     });
-                }
+                };
                 App.prototype.populateChoices = function () {
                     while (this.choices.length < 3) {
                         var index = Math.floor(Math.random() * this.snippets.length);
