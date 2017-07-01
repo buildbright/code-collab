@@ -1,0 +1,93 @@
+import {Group} from "./group";
+
+declare function require(moduleName:string):any;
+
+let groups:any = {};
+let users:any = {};
+
+var crypto = require("crypto");
+var app = require('express')();
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
+
+io.on('connection', function(connection:any) {
+    console.log("Connected!");
+    connection.data = {id:crypto.randomBytes(64).toString('hex')};
+    users[connection.data.id] = connection;
+
+    connection.on('join', function(groupName:string) {
+        if (connection.data == null) return;
+        let group:Group = null;
+        if (groupName != null && groupName.trim().length > 0) {
+            group = groups[groupName];
+            if (group == null) {
+                connection.emit("join", {err:"Group not found."});
+                return;
+            } else if (group.memberIds.indexOf(connection.data.id) > 0) {
+                connection.emit("join", {err:"You are already in the group."});
+                return;
+            } else if (group.memberIds.length === 4) {
+                connection.emit("join", {err:"Group is full."});
+                return;
+            }
+        } else {
+            let groupId:string = crypto.randomBytes(64).toString('hex').substr(0, 8);
+            if (groups[groupId] != null) {
+                connection.emit("join", {err:"Server error. Please try again."});
+                return;
+            }
+            connection.data.groupId = groupId;
+            groups[groupId] = group;
+
+            group = new Group();
+            connection.emit("join", {groupId:groupId, memberIds:group.memberIds, earnings:group.earnings});
+        }
+        group.memberIds.push(connection.data.id);
+    });
+
+    connection.on('select', function(selection:number) {
+        if (connection.data == null) return;
+    });
+
+    connection.on('disconnect', function() {
+        if (connection.data == null) return;
+    });
+});
+
+//let startRound = function(groupId:string):void {
+//    let group:Group = groups[groupId];
+//    if (group == null) return;
+//    for (let memberId of group.memberIds) {
+//        let user:any = users[memberId];
+//        if (user != null) user.emit(eventName, data);
+//    }
+//};
+
+let messageGroup = function(groupId:string, eventName:string, data:any = null):void {
+    let group:Group = groups[groupId];
+    if (group != null) {
+        for (let memberId of group.memberIds) {
+            let user:any = users[memberId];
+            if (user != null) user.emit(eventName, data);
+        }
+    }
+};
+
+var onJoin = function(groupName:string, userId:string) {
+    let group:Group = groups[groupName];
+    if (group != null) {
+        group = new Group();
+    }
+};
+
+var onSelect = function(snippetId:number, userId:string) {
+
+};
+
+var onQuit = function(userId:string) {
+
+};
+
+server.listen(3000);
+
+
