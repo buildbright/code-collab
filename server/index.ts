@@ -36,10 +36,6 @@ io.on('connection', function(connection:any) {
         });
     });
 
-    console.log("Connected!");
-    connection.data = {id:crypto.randomBytes(64).toString('hex')};
-    users[connection.data.id] = connection;
-
     connection.on('join', function(groupName:string) {
         if (connection.data == null) return;
         let group:Group = null;

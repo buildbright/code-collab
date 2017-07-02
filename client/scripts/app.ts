@@ -7,7 +7,6 @@ export class App {
     private snippets:string[];
     private choices:string[];
     private socket:any;
-    private phaser:any;
 
     public constructor() {
         //this.choices = [];

@@ -30,9 +30,6 @@ io.on('connection', function (connection) {
             connection.emit("login", { username: googleName });
         });
     });
-    console.log("Connected!");
-    connection.data = { id: crypto.randomBytes(64).toString('hex') };
-    users[connection.data.id] = connection;
     connection.on('join', function (groupName) {
         if (connection.data == null)
             return;
