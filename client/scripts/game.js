@@ -1,12 +1,19 @@
-System.register([], function(exports_1) {
+System.register(["./snippet"], function(exports_1) {
+    var snippet_1;
     var Game;
     return {
-        setters:[],
+        setters:[
+            function (snippet_1_1) {
+                snippet_1 = snippet_1_1;
+            }],
         execute: function() {
             Game = (function () {
                 function Game(socket) {
                     var _this = this;
                     this.socket = socket;
+                    this.goodCount = 0;
+                    this.mehCount = 0;
+                    this.badCount = 0;
                     this.snippetLab1 = null;
                     this.snippetLab2 = null;
                     this.snippetLab3 = null;
@@ -64,7 +71,18 @@ System.register([], function(exports_1) {
                     this.selectGroup = this.core.add.group();
                     this.runGroup = this.core.add.group();
                     this.core.add.sprite(0, 0, "select-bg", null, this.selectGroup);
-                    this.buildGame([0, 3, 6], "okay");
+                    this.snippets = [
+                        snippet_1.Snippet.SETTING_JUNGLE,
+                        snippet_1.Snippet.SETTING_SPACE,
+                        snippet_1.Snippet.SETTING_SEA,
+                        snippet_1.Snippet.CREATE_JUNGLE,
+                        snippet_1.Snippet.CREATE_SPACE,
+                        snippet_1.Snippet.CREATE_SEA,
+                        snippet_1.Snippet.ACTION_JUNGLE,
+                        snippet_1.Snippet.ACTION_SPACE,
+                        snippet_1.Snippet.ACTION_SEA
+                    ];
+                    this.showChoices([Math.floor(Math.random() * 9), Math.floor(Math.random() * 9)]);
                 };
                 Game.prototype.update = function (passedTime) {
                     if (this.updateAction != null)
@@ -78,12 +96,42 @@ System.register([], function(exports_1) {
                         }
                     }
                 };
+                Game.prototype.checkSnippets = function (snippetIds) {
+                    snippetIds.sort();
+                    if (snippetIds[0] < 0 || snippetIds[0] > 2) {
+                        this.buildGame(snippetIds, "Missing background and music.");
+                    }
+                    else if (snippetIds[1] < 3 || snippetIds[1] > 5) {
+                        this.buildGame(snippetIds, "No objects created.");
+                    }
+                    else if (snippetIds[2] < 6 || snippetIds[2] > 8) {
+                        this.buildGame(snippetIds, "Missing actions.");
+                    }
+                    else {
+                        if ((snippetIds[0] === 0 && snippetIds[1] === 3 && snippetIds[2] === 6)
+                            || (snippetIds[0] === 1 && snippetIds[1] === 4 && snippetIds[2] === 7)
+                            || (snippetIds[0] === 2 && snippetIds[1] === 5 && snippetIds[2] === 8)) {
+                            this.buildGame(snippetIds, null);
+                        }
+                        else {
+                            this.buildGame(snippetIds, "okay");
+                        }
+                    }
+                };
                 Game.prototype.showChoices = function (choices) {
+                    this.updateAction = null;
                     this.runGroup.removeAll(true);
                     this.runGroup.visible = false;
                     this.core.sound.stopAll();
+                    var style = {
+                        fill: "#00ff00",
+                        font: "16pt monospace"
+                    };
+                    var lab1 = this.core.add.text(35, 120, this.snippets[choices[0]], style, this.selectGroup);
+                    lab1.anchor.setTo(0, 0.5);
+                    var lab2 = this.core.add.text(435, 330, this.snippets[choices[1]], style, this.selectGroup);
+                    lab2.anchor.setTo(0, 0.5);
                     this.selectGroup.visible = true;
-                    //TODO
                 };
                 Game.prototype.buildGame = function (snippetIds, result) {
                     var _this = this;
@@ -99,6 +147,7 @@ System.register([], function(exports_1) {
                                 _this.buildPiece(snippetIds[2]);
                                 _this.onDelay(function () {
                                     if (result == null) {
+                                        _this.goodCount++;
                                         var style = {
                                             fontSize: 80 + "px",
                                             fill: "#00FF00"
@@ -111,6 +160,7 @@ System.register([], function(exports_1) {
                                         lab.y = 300;
                                     }
                                     else {
+                                        _this.mehCount++;
                                         var style = {
                                             fontSize: 80 + "px",
                                             fill: "#ffff00"
@@ -129,6 +179,16 @@ System.register([], function(exports_1) {
                             }, 3000);
                         }
                         else {
+                            _this.badCount++;
+                            var style = {
+                                fill: "#00ff00"
+                            };
+                            var lab = _this.core.add.text(25, 300, "Error has occurred:\n" + result, style, _this.runGroup);
+                            lab.cssFont = "36pt monospace";
+                            lab.anchor.setTo(0, 0.5);
+                            _this.onDelay(function () {
+                                _this.showChoices(null);
+                            }, 7000);
                         }
                     }, 1000);
                 };
@@ -184,7 +244,7 @@ System.register([], function(exports_1) {
                                 var laser = _this.core.add.sprite(_this.spriteA.x, _this.spriteA.y, "laser", null, _this.runGroup);
                                 laser.width = _this.spriteA.width * .75;
                                 laser.scale.y = laser.scale.x;
-                                var laserTween = _this.runGroup.add.tween(laser).to({ x: 1000 }, 1000);
+                                var laserTween = _this.core.add.tween(laser).to({ x: 1000 }, 1000);
                                 _this.sounds['shoot'].play();
                                 laserTween.start();
                             });

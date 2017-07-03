@@ -1,6 +1,9 @@
+import {Snippet} from "./snippet";
 declare var Phaser;
 
 export class Game {
+
+    private snippets:string[];
 
     private core:any;
     private spriteA:any;
@@ -16,6 +19,10 @@ export class Game {
     private snippetLab1:any;
     private snippetLab2:any;
     private snippetLab3:any;
+
+    private goodCount:number = 0;
+    private mehCount:number = 0;
+    private badCount:number = 0;
 
     public constructor(private socket:any) {
         this.snippetLab1 = null;
@@ -82,7 +89,19 @@ export class Game {
         this.runGroup = this.core.add.group();
         this.core.add.sprite(0, 0, "select-bg", null, this.selectGroup);
 
-        this.buildGame([0,3,6], "okay");
+        this.snippets = [
+            Snippet.SETTING_JUNGLE,
+            Snippet.SETTING_SPACE,
+            Snippet.SETTING_SEA,
+            Snippet.CREATE_JUNGLE,
+            Snippet.CREATE_SPACE,
+            Snippet.CREATE_SEA,
+            Snippet.ACTION_JUNGLE,
+            Snippet.ACTION_SPACE,
+            Snippet.ACTION_SEA
+        ];
+
+        this.showChoices([Math.floor(Math.random()*9), Math.floor(Math.random()*9)]);
     }
 
     private update(passedTime:number):void {
@@ -96,13 +115,41 @@ export class Game {
         }
     }
 
-    private showChoices(choices:number):void {
+    private checkSnippets(snippetIds:number[]):void {
+        snippetIds.sort();
+        if (snippetIds[0] < 0 || snippetIds[0] > 2) {
+            this.buildGame(snippetIds, "Missing background and music.");
+        } else if (snippetIds[1] < 3 || snippetIds[1] > 5) {
+            this.buildGame(snippetIds, "No objects created.");
+        } else if (snippetIds[2] < 6 || snippetIds[2] > 8) {
+            this.buildGame(snippetIds, "Missing actions.");
+        } else {
+            if ((snippetIds[0] === 0 && snippetIds[1] === 3 && snippetIds[2] === 6)
+                ||(snippetIds[0] === 1 && snippetIds[1] === 4 && snippetIds[2] === 7)
+                ||(snippetIds[0] === 2 && snippetIds[1] === 5 && snippetIds[2] === 8)) {
+                this.buildGame(snippetIds, null);
+            } else {
+                this.buildGame(snippetIds, "okay");
+            }
+        }
+    }
+
+    private showChoices(choices:number[]):void {
+        this.updateAction = null;
         this.runGroup.removeAll(true);
         this.runGroup.visible = false;
         this.core.sound.stopAll();
 
+        let style:any = {
+            fill:"#00ff00",
+            font:"16pt monospace"
+        };
+
+        let lab1:any = this.core.add.text(35, 120, this.snippets[choices[0]], style, this.selectGroup);
+        lab1.anchor.setTo(0, 0.5);
+        let lab2:any = this.core.add.text(435, 330, this.snippets[choices[1]], style, this.selectGroup);
+        lab2.anchor.setTo(0, 0.5);
         this.selectGroup.visible = true;
-        //TODO
     }
 
     private buildGame(snippetIds:number[], result:string):void {
@@ -118,6 +165,7 @@ export class Game {
                     this.buildPiece(snippetIds[2]);
                     this.onDelay(() => {
                         if (result == null) {
+                            this.goodCount++;
                             let style:any = {
                                 fontSize:80+"px",
                                 fill:"#00FF00"
@@ -129,6 +177,7 @@ export class Game {
                             lab.x = 400;
                             lab.y = 300;
                         } else {
+                            this.mehCount++;
                             let style:any = {
                                 fontSize:80+"px",
                                 fill:"#ffff00"
@@ -146,7 +195,16 @@ export class Game {
                     }, 7000);
                 }, 3000);
             } else {
-                //TODO
+                this.badCount++;
+                let style:any = {
+                    fill:"#00ff00"
+                };
+                let lab:any = this.core.add.text(25, 300, `Error has occurred:\n${result}`, style, this.runGroup);
+                lab.cssFont = "36pt monospace";
+                lab.anchor.setTo(0, 0.5);
+                this.onDelay(() => {
+                    this.showChoices(null);
+                }, 7000);
             }
         }, 1000);
     }
@@ -204,7 +262,7 @@ export class Game {
                     let laser:any = this.core.add.sprite(this.spriteA.x, this.spriteA.y, "laser", null, this.runGroup);
                     laser.width = this.spriteA.width*.75;
                     laser.scale.y = laser.scale.x;
-                    let laserTween:any = this.runGroup.add.tween(laser).to({x:1000}, 1000);
+                    let laserTween:any = this.core.add.tween(laser).to({x:1000}, 1000);
                     this.sounds['shoot'].play();
                     laserTween.start();
                 });
