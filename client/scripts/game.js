@@ -14,6 +14,7 @@ System.register(["./snippet"], function(exports_1) {
                     this.goodCount = 0;
                     this.mehCount = 0;
                     this.badCount = 0;
+                    this.choiceLabs = [];
                     this.snippetLab1 = null;
                     this.snippetLab2 = null;
                     this.snippetLab3 = null;
@@ -123,15 +124,39 @@ System.register(["./snippet"], function(exports_1) {
                     this.runGroup.removeAll(true);
                     this.runGroup.visible = false;
                     this.core.sound.stopAll();
+                    var lab1 = this.createChoiceLab(choices[0], 35);
+                    var lab2 = this.createChoiceLab(choices[1], 435);
+                    this.selectGroup.visible = true;
+                };
+                Game.prototype.createChoiceLab = function (snippetId, x) {
+                    var _this = this;
                     var style = {
                         fill: "#00ff00",
                         font: "16pt monospace"
                     };
-                    var lab1 = this.core.add.text(35, 120, this.snippets[choices[0]], style, this.selectGroup);
-                    lab1.anchor.setTo(0, 0.5);
-                    var lab2 = this.core.add.text(435, 330, this.snippets[choices[1]], style, this.selectGroup);
-                    lab2.anchor.setTo(0, 0.5);
-                    this.selectGroup.visible = true;
+                    var lab = this.core.add.text(x, 330, this.snippets[snippetId], style, this.selectGroup);
+                    lab.anchor.setTo(0, 0.5);
+                    lab.inputEnabled = true;
+                    lab.events.onInputOver.add(function () {
+                        lab.fill = "#FFFF00";
+                    }, this);
+                    lab.events.onInputOut.add(function () {
+                        lab.fill = "#00FF00";
+                    }, this);
+                    lab.events.onInputDown.add(function () {
+                        console.log(snippetId);
+                        _this.choiceLabs[0].destroy();
+                        _this.choiceLabs[1].destroy();
+                        _this.choiceLabs.length = 0;
+                        _this.selectGroup.visible = false;
+                        var style = {
+                            fill: "#00ff00",
+                            font: "64pt monospace"
+                        };
+                        var lab = _this.core.add.text(400, 300, "Please wait...", style);
+                        lab.anchor.setTo(0.5, 0.5);
+                    }, this);
+                    this.choiceLabs.push(lab);
                 };
                 Game.prototype.buildGame = function (snippetIds, result) {
                     var _this = this;

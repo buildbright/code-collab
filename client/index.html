@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Code Collab</title>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-    <meta name="google-signin-client_id" content="369682439691-dotpfi9fsqabij24dktfm29b0ri8mbep.apps.googleusercontent.com">
+    <!--<script src="https://apis.google.com/js/platform.js" async defer></script>-->
+    <!--<meta name="google-signin-client_id" content="369682439691-dotpfi9fsqabij24dktfm29b0ri8mbep.apps.googleusercontent.com">-->
 </head>
 <body>
 <div style="display: none" id="content">
@@ -14,12 +14,18 @@
     <section id="login">
         <div id="my-signin2"></div>
     </section>
+    <section id="select">
+        <h2>Join Team</h2>
+        <input type="text" id="groupNameInp">
+        <button id="joinBtn">Join Team</button>
+    </section>
     <section id="active">
         <div id="app"></div>
     </section>
 </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>-->
+<script src="scripts/lib/jquery.min.js"></script>
 <script src="scripts/lib/socket.io.js"></script>
 <script src="scripts/lib/phaser.js"></script>
 <script src="scripts/lib/system.js"></script>

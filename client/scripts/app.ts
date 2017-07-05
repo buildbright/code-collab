@@ -32,7 +32,9 @@ export class App {
 
         $("#content").show();
 
-        this.renderLoginButton();
+//        this.renderLoginButton();
+
+        this.connectToServer(null);
     }
 
     private renderLoginButton():void {
@@ -61,13 +63,29 @@ export class App {
             this.socket.once("login", (data:any) => {
                 $("#connecting").hide();
                 if (data.err != null) alert(data.err);
-                else {
+                else if (data.group != null) {
+                    this.onJoin(data.group);
+                } else {
                     console.log(`Welcome, ${data.username}!`);
-                    $("#active").show();
-                    new Game(this.socket);
+
+                    $("#joinBtn").on("click", () => {
+                        let groupName:string = $("#groupNameInp").val().trim();
+                        this.socket.emit("join", {groupName:groupName});
+                        this.socket.once("join", (data:any) => {
+                            $("#select").hide();
+                            if (data.err != null) alert(data.err);
+                            else this.onJoin(data.group);
+                        });
+                    });
+
                 }
             });
         });
+    }
+
+    private onJoin(group:any):void {
+        //$("#active").show();
+        //new Game(this.socket);
     }
 
     private populateChoices():void {

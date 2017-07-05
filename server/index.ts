@@ -2,6 +2,9 @@ import {Group} from "./group";
 
 declare function require(moduleName:string):any;
 
+
+let teamNames:string[] = ["Monkey", "Elephant", "Shark", "Fish", "Ship", "Laser", "Asteroid", "Ocean", "Jungle", "Space"];
+
 let groups:any = {};
 let users:any = {};
 
@@ -10,6 +13,10 @@ var app = require('express')();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var request = require('request');
+
+for (let teamName of teamNames) {
+    groups[teamName] = new Group();
+}
 
 let fetchGoogleName = function(token:string, callback:(googleName:string) => void):void {
     request("https://www.googleapis.com/oauth2/v3/tokeninfo?id_token="+encodeURIComponent(token), (error, response, body) => {
@@ -26,14 +33,26 @@ let fetchGoogleName = function(token:string, callback:(googleName:string) => voi
 io.on('connection', function(connection:any) {
     connection.data = {};
 
+    connection.on('create', function(data:any) {
+        let groupName:string = null;
+        do {
+            let wordIndex:number = Math.floor(Math.random()*words.length);
+            groupName = words[wordIndex] + Math.floor(Math.random()*1000);
+        } while(groups[groupName] != null);
+        console.log(groupName);
+    });
+
     connection.on('login', function(data:any) {
         if (connection.data == null) return;
         let token:string = data.token;
-        fetchGoogleName(token, function(googleName:string){
-            connection.data.username = googleName;
-            users[googleName] = connection;
-            connection.emit("login", {username:googleName});
-        });
+        connection.data.username = "Test";
+        users["Test"] = connection;
+        connection.emit("login", {username:"Test"});
+        //fetchGoogleName(token, function(googleName:string){
+        //    connection.data.username = googleName;
+        //    users[googleName] = connection;
+        //    connection.emit("login", {username:googleName});
+        //});
     });
 
     connection.on('join', function(groupName:string) {

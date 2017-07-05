@@ -1,4 +1,5 @@
 var group_1 = require("./group");
+var teamNames = ["Monkey", "Elephant", "Shark", "Fish", "Ship", "Laser", "Asteroid", "Ocean", "Jungle", "Space"];
 var groups = {};
 var users = {};
 var crypto = require("crypto");
@@ -6,6 +7,10 @@ var app = require('express')();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var request = require('request');
+for (var _i = 0; _i < teamNames.length; _i++) {
+    var teamName = teamNames[_i];
+    groups[teamName] = new group_1.Group();
+}
 var fetchGoogleName = function (token, callback) {
     request("https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=" + encodeURIComponent(token), function (error, response, body) {
         if (error == null && response.statusCode == 200) {
@@ -20,15 +25,26 @@ var fetchGoogleName = function (token, callback) {
 };
 io.on('connection', function (connection) {
     connection.data = {};
+    connection.on('create', function (data) {
+        var groupName = null;
+        do {
+            var wordIndex = Math.floor(Math.random() * words.length);
+            groupName = words[wordIndex] + Math.floor(Math.random() * 1000);
+        } while (groups[groupName] != null);
+        console.log(groupName);
+    });
     connection.on('login', function (data) {
         if (connection.data == null)
             return;
         var token = data.token;
-        fetchGoogleName(token, function (googleName) {
-            connection.data.username = googleName;
-            users[googleName] = connection;
-            connection.emit("login", { username: googleName });
-        });
+        connection.data.username = "Test";
+        users["Test"] = connection;
+        connection.emit("login", { username: "Test" });
+        //fetchGoogleName(token, function(googleName:string){
+        //    connection.data.username = googleName;
+        //    users[googleName] = connection;
+        //    connection.emit("login", {username:googleName});
+        //});
     });
     connection.on('join', function (groupName) {
         if (connection.data == null)

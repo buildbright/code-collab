@@ -24,7 +24,12 @@ export class Game {
     private mehCount:number = 0;
     private badCount:number = 0;
 
+    private choiceLabs:any[];
+
     public constructor(private socket:any) {
+
+        this.choiceLabs = [];
+
         this.snippetLab1 = null;
         this.snippetLab2 = null;
         this.snippetLab3 = null;
@@ -140,16 +145,48 @@ export class Game {
         this.runGroup.visible = false;
         this.core.sound.stopAll();
 
+        let lab1:any = this.createChoiceLab(choices[0], 35);
+        let lab2:any = this.createChoiceLab(choices[1], 435);
+
+        this.selectGroup.visible = true;
+    }
+
+    private createChoiceLab(snippetId:number, x:number) {
         let style:any = {
             fill:"#00ff00",
             font:"16pt monospace"
         };
 
-        let lab1:any = this.core.add.text(35, 120, this.snippets[choices[0]], style, this.selectGroup);
-        lab1.anchor.setTo(0, 0.5);
-        let lab2:any = this.core.add.text(435, 330, this.snippets[choices[1]], style, this.selectGroup);
-        lab2.anchor.setTo(0, 0.5);
-        this.selectGroup.visible = true;
+        let lab:any = this.core.add.text(x, 330, this.snippets[snippetId], style, this.selectGroup);
+
+        lab.anchor.setTo(0, 0.5);
+
+        lab.inputEnabled = true;
+
+        lab.events.onInputOver.add(() => {
+            lab.fill = "#FFFF00";
+        }, this);
+
+        lab.events.onInputOut.add(() => {
+            lab.fill = "#00FF00";
+        }, this);
+
+        lab.events.onInputDown.add(() => {
+            console.log(snippetId);
+            this.choiceLabs[0].destroy();
+            this.choiceLabs[1].destroy();
+            this.choiceLabs.length = 0;
+            this.selectGroup.visible = false;
+
+            let style:any = {
+                fill:"#00ff00",
+                font:"64pt monospace"
+            };
+            let lab:any = this.core.add.text(400, 300, "Please wait...", style);
+            lab.anchor.setTo(0.5, 0.5);
+        }, this);
+
+        this.choiceLabs.push(lab);
     }
 
     private buildGame(snippetIds:number[], result:string):void {

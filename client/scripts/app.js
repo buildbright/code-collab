@@ -1,13 +1,10 @@
-System.register(["./snippet", "./game"], function(exports_1) {
-    var snippet_1, game_1;
+System.register(["./snippet"], function(exports_1) {
+    var snippet_1;
     var App;
     return {
         setters:[
             function (snippet_1_1) {
                 snippet_1 = snippet_1_1;
-            },
-            function (game_1_1) {
-                game_1 = game_1_1;
             }],
         execute: function() {
             App = (function () {
@@ -32,7 +29,8 @@ System.register(["./snippet", "./game"], function(exports_1) {
                     $("#login").hide();
                     $("#active").hide();
                     $("#content").show();
-                    this.renderLoginButton();
+                    //        this.renderLoginButton();
+                    this.connectToServer(null);
                 }
                 App.prototype.renderLoginButton = function () {
                     var _this = this;
@@ -62,13 +60,29 @@ System.register(["./snippet", "./game"], function(exports_1) {
                             $("#connecting").hide();
                             if (data.err != null)
                                 alert(data.err);
+                            else if (data.group != null) {
+                                _this.onJoin(data.group);
+                            }
                             else {
                                 console.log("Welcome, " + data.username + "!");
-                                $("#active").show();
-                                new game_1.Game(_this.socket);
+                                $("#joinBtn").on("click", function () {
+                                    var groupName = $("#groupNameInp").val().trim();
+                                    _this.socket.emit("join", { groupName: groupName });
+                                    _this.socket.once("join", function (data) {
+                                        $("#select").hide();
+                                        if (data.err != null)
+                                            alert(data.err);
+                                        else
+                                            _this.onJoin(data.group);
+                                    });
+                                });
                             }
                         });
                     });
+                };
+                App.prototype.onJoin = function (group) {
+                    //$("#active").show();
+                    //new Game(this.socket);
                 };
                 App.prototype.populateChoices = function () {
                     while (this.choices.length < 3) {
