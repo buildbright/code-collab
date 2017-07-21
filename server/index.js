@@ -1,5 +1,6 @@
 var group_1 = require("./group");
-var teamNames = ["Monkey", "Elephant", "Shark", "Fish", "Ship", "Laser", "Asteroid", "Ocean", "Jungle", "Space"];
+var user_1 = require("./user");
+var teamNames = ["monkey", "elephant", "shark", "fish", "ship", "laser", "asteroid", "ocean", "jungle", "space"];
 var groups = {};
 var users = {};
 var crypto = require("crypto");
@@ -9,7 +10,8 @@ var io = require('socket.io')(server);
 var request = require('request');
 for (var _i = 0; _i < teamNames.length; _i++) {
     var teamName = teamNames[_i];
-    groups[teamName] = new group_1.Group();
+    var group = new group_1.Group(teamName);
+    groups[teamName] = group;
 }
 var fetchGoogleName = function (token, callback) {
     request("https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=" + encodeURIComponent(token), function (error, response, body) {
@@ -25,58 +27,63 @@ var fetchGoogleName = function (token, callback) {
 };
 io.on('connection', function (connection) {
     connection.data = {};
-    connection.on('create', function (data) {
-        var groupName = null;
-        do {
-            var wordIndex = Math.floor(Math.random() * words.length);
-            groupName = words[wordIndex] + Math.floor(Math.random() * 1000);
-        } while (groups[groupName] != null);
-        console.log(groupName);
-    });
+    //connection.on('create', function(data:any) {
+    //    let groupName:string = null;
+    //    do {
+    //        let wordIndex:number = Math.floor(Math.random()*words.length);
+    //        groupName = words[wordIndex] + Math.floor(Math.random()*1000);
+    //    } while(groups[groupName] != null);
+    //    console.log(groupName);
+    //});
     connection.on('login', function (data) {
         if (connection.data == null)
             return;
         var token = data.token;
-        connection.data.username = "Test";
-        users["Test"] = connection;
-        connection.emit("login", { username: "Test" });
         //fetchGoogleName(token, function(googleName:string){
         //    connection.data.username = googleName;
         //    users[googleName] = connection;
         //    connection.emit("login", {username:googleName});
         //});
-    });
-    connection.on('join', function (groupName) {
-        if (connection.data == null)
-            return;
-        var group = null;
-        if (groupName != null && groupName.trim().length > 0) {
-            group = groups[groupName];
-            if (group == null) {
-                connection.emit("join", { err: "Group not found." });
-                return;
-            }
-            else if (group.memberIds.indexOf(connection.data.id) > 0) {
-                connection.emit("join", { err: "You are already in the group." });
-                return;
-            }
-            else if (group.memberIds.length === 4) {
-                connection.emit("join", { err: "Group is full." });
-                return;
+        var username = crypto.randomBytes(64).toString('hex').substr(0, 32);
+        connection.data.username = username;
+        var user = users[username];
+        if (user != null) {
+            if (user.connection != null) {
+                user.connection.disconnect();
+                user.connection = null;
             }
         }
         else {
-            var groupId = crypto.randomBytes(64).toString('hex').substr(0, 8);
-            if (groups[groupId] != null) {
-                connection.emit("join", { err: "Server error. Please try again." });
-                return;
-            }
-            connection.data.groupId = groupId;
-            groups[groupId] = group;
-            group = new group_1.Group();
-            connection.emit("join", { groupId: groupId, memberIds: group.memberIds, earnings: group.earnings });
+            user = new user_1.User(username, connection);
+            users[username] = user;
         }
-        group.memberIds.push(connection.data.id);
+        if (user.group != null)
+            connection.emit("login", { username: username, groupId: user.group.id });
+        else
+            connection.emit("login", { username: username, groupId: null });
+    });
+    connection.on('join', function (data) {
+        if (connection.data == null)
+            return;
+        var groupName = data.groupName;
+        var user = users[connection.data.username];
+        if (user == null)
+            return;
+        var group = groups[groupName];
+        if (group == null) {
+            connection.emit("join", { err: "Invalid team name." });
+        }
+        else if (group.users.length === 4) {
+            connection.emit("join", { err: "Team is full." });
+        }
+        else if (user.group != null) {
+            connection.emit("join", { err: "You are already in a group." });
+        }
+        else {
+            group.users.push(user);
+            user.group = group;
+            connection.emit("join", {});
+        }
     });
     connection.on('select', function (selection) {
         if (connection.data == null)
@@ -95,24 +102,6 @@ io.on('connection', function (connection) {
 //        if (user != null) user.emit(eventName, data);
 //    }
 //};
-var messageGroup = function (groupId, eventName, data) {
-    if (data === void 0) { data = null; }
-    var group = groups[groupId];
-    if (group != null) {
-        for (var _i = 0, _a = group.memberIds; _i < _a.length; _i++) {
-            var memberId = _a[_i];
-            var user = users[memberId];
-            if (user != null)
-                user.emit(eventName, data);
-        }
-    }
-};
-var onJoin = function (groupName, userId) {
-    var group = groups[groupName];
-    if (group != null) {
-        group = new group_1.Group();
-    }
-};
 var onSelect = function (snippetId, userId) {
 };
 var onQuit = function (userId) {

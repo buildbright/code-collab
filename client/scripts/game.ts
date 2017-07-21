@@ -5,13 +5,14 @@ export class Game {
 
     private snippets:string[];
 
-    private core:any;
+    public core:any;
     private spriteA:any;
     private spriteB:any;
     private sounds:any;
 
     private selectGroup:any;
     private runGroup:any;
+    private messageGroup:any;
 
     private updateAction:(passedTime:number) => void;
     private delayFns:any[];
@@ -90,9 +91,7 @@ export class Game {
         this.sounds['underwater'] = this.core.add.audio('underwater');
         this.sounds['underwater-bgm'] = this.core.add.audio('underwater-bgm');
 
-        this.selectGroup = this.core.add.group();
         this.runGroup = this.core.add.group();
-        this.core.add.sprite(0, 0, "select-bg", null, this.selectGroup);
 
         this.snippets = [
             Snippet.SETTING_JUNGLE,
@@ -106,7 +105,8 @@ export class Game {
             Snippet.ACTION_SEA
         ];
 
-        this.showChoices([Math.floor(Math.random()*9), Math.floor(Math.random()*9)]);
+        this.selectGroup.visible = false;
+        this.runGroup.visible = false;
     }
 
     private update(passedTime:number):void {
@@ -139,55 +139,25 @@ export class Game {
         }
     }
 
+    private wait(message:string = "Please Wait..."):void {
+        this.selectGroup.visible = false;
+        this.runGroup.visible = true;
+        let style:any = {
+            fill:"#00ff00"
+        };
+        let lab:any = this.core.add.text(400, 300, message, style, this.runGroup);
+        lab.cssFont = "36pt monospace";
+        lab.anchor.setTo(0.5, 0.5);
+    }
+
     private showChoices(choices:number[]):void {
         this.updateAction = null;
         this.runGroup.removeAll(true);
         this.runGroup.visible = false;
         this.core.sound.stopAll();
-
-        let lab1:any = this.createChoiceLab(choices[0], 35);
-        let lab2:any = this.createChoiceLab(choices[1], 435);
-
-        this.selectGroup.visible = true;
     }
 
-    private createChoiceLab(snippetId:number, x:number) {
-        let style:any = {
-            fill:"#00ff00",
-            font:"16pt monospace"
-        };
 
-        let lab:any = this.core.add.text(x, 330, this.snippets[snippetId], style, this.selectGroup);
-
-        lab.anchor.setTo(0, 0.5);
-
-        lab.inputEnabled = true;
-
-        lab.events.onInputOver.add(() => {
-            lab.fill = "#FFFF00";
-        }, this);
-
-        lab.events.onInputOut.add(() => {
-            lab.fill = "#00FF00";
-        }, this);
-
-        lab.events.onInputDown.add(() => {
-            console.log(snippetId);
-            this.choiceLabs[0].destroy();
-            this.choiceLabs[1].destroy();
-            this.choiceLabs.length = 0;
-            this.selectGroup.visible = false;
-
-            let style:any = {
-                fill:"#00ff00",
-                font:"64pt monospace"
-            };
-            let lab:any = this.core.add.text(400, 300, "Please wait...", style);
-            lab.anchor.setTo(0.5, 0.5);
-        }, this);
-
-        this.choiceLabs.push(lab);
-    }
 
     private buildGame(snippetIds:number[], result:string):void {
         this.selectGroup.visible = false;

@@ -69,9 +69,7 @@ System.register(["./snippet"], function(exports_1) {
                     this.sounds['space-bgm'] = this.core.add.audio('space-bgm');
                     this.sounds['underwater'] = this.core.add.audio('underwater');
                     this.sounds['underwater-bgm'] = this.core.add.audio('underwater-bgm');
-                    this.selectGroup = this.core.add.group();
                     this.runGroup = this.core.add.group();
-                    this.core.add.sprite(0, 0, "select-bg", null, this.selectGroup);
                     this.snippets = [
                         snippet_1.Snippet.SETTING_JUNGLE,
                         snippet_1.Snippet.SETTING_SPACE,
@@ -83,7 +81,8 @@ System.register(["./snippet"], function(exports_1) {
                         snippet_1.Snippet.ACTION_SPACE,
                         snippet_1.Snippet.ACTION_SEA
                     ];
-                    this.showChoices([Math.floor(Math.random() * 9), Math.floor(Math.random() * 9)]);
+                    this.selectGroup.visible = false;
+                    this.runGroup.visible = false;
                 };
                 Game.prototype.update = function (passedTime) {
                     if (this.updateAction != null)
@@ -119,44 +118,22 @@ System.register(["./snippet"], function(exports_1) {
                         }
                     }
                 };
+                Game.prototype.wait = function (message) {
+                    if (message === void 0) { message = "Please Wait..."; }
+                    this.selectGroup.visible = false;
+                    this.runGroup.visible = true;
+                    var style = {
+                        fill: "#00ff00"
+                    };
+                    var lab = this.core.add.text(400, 300, message, style, this.runGroup);
+                    lab.cssFont = "36pt monospace";
+                    lab.anchor.setTo(0.5, 0.5);
+                };
                 Game.prototype.showChoices = function (choices) {
                     this.updateAction = null;
                     this.runGroup.removeAll(true);
                     this.runGroup.visible = false;
                     this.core.sound.stopAll();
-                    var lab1 = this.createChoiceLab(choices[0], 35);
-                    var lab2 = this.createChoiceLab(choices[1], 435);
-                    this.selectGroup.visible = true;
-                };
-                Game.prototype.createChoiceLab = function (snippetId, x) {
-                    var _this = this;
-                    var style = {
-                        fill: "#00ff00",
-                        font: "16pt monospace"
-                    };
-                    var lab = this.core.add.text(x, 330, this.snippets[snippetId], style, this.selectGroup);
-                    lab.anchor.setTo(0, 0.5);
-                    lab.inputEnabled = true;
-                    lab.events.onInputOver.add(function () {
-                        lab.fill = "#FFFF00";
-                    }, this);
-                    lab.events.onInputOut.add(function () {
-                        lab.fill = "#00FF00";
-                    }, this);
-                    lab.events.onInputDown.add(function () {
-                        console.log(snippetId);
-                        _this.choiceLabs[0].destroy();
-                        _this.choiceLabs[1].destroy();
-                        _this.choiceLabs.length = 0;
-                        _this.selectGroup.visible = false;
-                        var style = {
-                            fill: "#00ff00",
-                            font: "64pt monospace"
-                        };
-                        var lab = _this.core.add.text(400, 300, "Please wait...", style);
-                        lab.anchor.setTo(0.5, 0.5);
-                    }, this);
-                    this.choiceLabs.push(lab);
                 };
                 Game.prototype.buildGame = function (snippetIds, result) {
                     var _this = this;
