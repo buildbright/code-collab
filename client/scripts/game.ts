@@ -77,7 +77,7 @@ export class Game {
         this.resultScreen = new ResultScreen(this);
 
         this.hideAll();
-        this.waitScreen();
+        this.waitScreen.show();
     }
 
     private hideAll():void {
