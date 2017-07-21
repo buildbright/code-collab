@@ -74,7 +74,7 @@ System.register(["./screens/wait-screen", "./screens/select-screen", "./screens/
                     this.playScreen = new play_screen_1.PlayScreen(this);
                     this.resultScreen = new result_screen_1.ResultScreen(this);
                     this.hideAll();
-                    this.waitScreen();
+                    this.waitScreen.show();
                 };
                 Game.prototype.hideAll = function () {
                     this.waitScreen.hide();
