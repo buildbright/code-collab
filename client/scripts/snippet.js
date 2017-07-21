@@ -15,6 +15,17 @@ System.register([], function(exports_1) {
                 Snippet.ACTION_JUNGLE = "a.jump();\nb.trumpet();";
                 Snippet.ACTION_SPACE = "a.shoot();\nb.float();";
                 Snippet.ACTION_SEA = "a.eat();\nb.swim();";
+                Snippet.LIST = [
+                    Snippet.SETTING_JUNGLE,
+                    Snippet.SETTING_SPACE,
+                    Snippet.SETTING_SEA,
+                    Snippet.CREATE_JUNGLE,
+                    Snippet.CREATE_SPACE,
+                    Snippet.CREATE_SEA,
+                    Snippet.ACTION_JUNGLE,
+                    Snippet.ACTION_SPACE,
+                    Snippet.ACTION_SEA //8
+                ];
                 return Snippet;
             })();
             exports_1("Snippet", Snippet);

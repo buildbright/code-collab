@@ -4,7 +4,7 @@ export class WaitScreen {
     private group:any;
     private lab:any;
 
-    public constructor(game:Game) {
+    public constructor(private game:Game) {
         this.group = game.core.add.group();
         let style:any = {
             fill:"#00ff00"

@@ -6,10 +6,9 @@ System.register(["./app"], function(exports_1) {
                 app_1 = app_1_1;
             }],
         execute: function() {
-            new app_1.App();
-            window["onSignIn"] = function () {
-                console.log("Hello World!");
-            };
+            $(document).ready(function () {
+                new app_1.App();
+            });
         }
     }
 });

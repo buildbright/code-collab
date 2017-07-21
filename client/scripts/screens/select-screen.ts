@@ -1,4 +1,5 @@
 import {Game} from "../game";
+import {Snippet} from "../snippet";
 export class SelectScreen {
 
     private group:any;
@@ -6,17 +7,17 @@ export class SelectScreen {
     private choiceALab:any;
     private choiceBLab:any;
 
-    public constructor(game:Game) {
+    public constructor(private game:Game) {
         this.group = game.core.add.group();
-        this.group.add.sprite(0, 0, "select-bg", null, this.group);
+        this.game.core.add.sprite(0, 0, "select-bg", null, this.group);
 
         this.choiceALab = this.createChoiceLab(game, 35);
         this.choiceBLab = this.createChoiceLab(game, 435);
     }
 
     public show(choiceA:number, choiceB:number):void {
-
-
+        this.choiceALab.text = Snippet.LIST[choiceA];
+        this.choiceBLab.text = Snippet.LIST[choiceB];
 
         this.group.visible = true;
     }
@@ -25,7 +26,7 @@ export class SelectScreen {
         this.group.visible = false;
     }
 
-    private createChoiceLab(game:Game, x:number) {
+    private createChoiceLab(game:Game, x:number):any {
         let style:any = {
             fill:"#00ff00",
             font:"16pt monospace"
@@ -48,5 +49,7 @@ export class SelectScreen {
         lab.events.onInputDown.add(() => {
             //TODO
         }, this);
+
+        return lab;
     }
 }

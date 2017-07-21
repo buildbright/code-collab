@@ -5,6 +5,7 @@ System.register([], function(exports_1) {
         execute: function() {
             WaitScreen = (function () {
                 function WaitScreen(game) {
+                    this.game = game;
                     this.group = game.core.add.group();
                     var style = {
                         fill: "#00ff00"

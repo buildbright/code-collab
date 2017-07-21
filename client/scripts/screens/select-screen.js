@@ -1,16 +1,23 @@
-System.register([], function(exports_1) {
+System.register(["../snippet"], function(exports_1) {
+    var snippet_1;
     var SelectScreen;
     return {
-        setters:[],
+        setters:[
+            function (snippet_1_1) {
+                snippet_1 = snippet_1_1;
+            }],
         execute: function() {
             SelectScreen = (function () {
                 function SelectScreen(game) {
+                    this.game = game;
                     this.group = game.core.add.group();
-                    this.group.add.sprite(0, 0, "select-bg", null, this.group);
+                    this.game.core.add.sprite(0, 0, "select-bg", null, this.group);
                     this.choiceALab = this.createChoiceLab(game, 35);
                     this.choiceBLab = this.createChoiceLab(game, 435);
                 }
                 SelectScreen.prototype.show = function (choiceA, choiceB) {
+                    this.choiceALab.text = snippet_1.Snippet.LIST[choiceA];
+                    this.choiceBLab.text = snippet_1.Snippet.LIST[choiceB];
                     this.group.visible = true;
                 };
                 SelectScreen.prototype.hide = function () {
@@ -33,6 +40,7 @@ System.register([], function(exports_1) {
                     lab.events.onInputDown.add(function () {
                         //TODO
                     }, this);
+                    return lab;
                 };
                 return SelectScreen;
             })();
